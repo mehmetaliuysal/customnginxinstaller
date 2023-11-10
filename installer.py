@@ -42,6 +42,13 @@ def update_nginx_conf():
             lines = file.readlines()
 
         with open('/etc/nginx/nginx.conf', 'w') as file:
+
+            # Add modules at the end of the file
+            for module in modules_to_add:
+                if module + '\n' not in lines:
+                    file.write(module + '\n')
+
+
             http_block_found = False
             for line in lines:
                 if 'http {' in line:
