@@ -1,6 +1,7 @@
 import subprocess
 import os
 import time
+import sys
 
 # Color codes for ANSI
 class Colors:
@@ -21,26 +22,58 @@ def run_command(command, success_message):
 
 
 def update_nginx_conf():
-    """ Update /etc/nginx/nginx.conf file with necessary modules """
+    """ Update /etc/nginx/nginx.conf file with necessary modules and configurations """
     modules_to_add = [
         "load_module /usr/lib/nginx/modules/ngx_http_vhost_traffic_status_module.so;",
         "load_module /usr/lib/nginx/modules/ngx_stream_module.so;",
         "load_module /usr/lib/nginx/modules/ngx_stream_server_traffic_status_module.so;",
         "load_module /usr/lib/nginx/modules/ngx_http_stream_server_traffic_status_module.so;"
     ]
+    http_block_to_add = [
+        "\tvhost_traffic_status_zone;",
+        "\tstream_server_traffic_status_zone;"
+    ]
+    server_block_to_add = [
+        "\t\tlocation /nginx_status {\n\t\t\tstub_status;\n\t\t}\n",
+        "\t\tlocation /http_traffic_status {\n\t\t\tvhost_traffic_status_bypass_limit on;\n\t\t\tvhost_traffic_status_bypass_stats on;\n\t\t\tvhost_traffic_status_display;\n\t\t\tvhost_traffic_status_display_format json;\n\t\t}\n"
+    ]
     try:
         with open('/etc/nginx/nginx.conf', 'r+') as file:
             lines = file.readlines()
             file.seek(0)
 
+            # Add modules
             for module in modules_to_add:
                 if module not in lines:
                     file.write(module + '\n')
 
-            file.writelines(lines)
+            # Add to http block
+            http_block_found = False
+            server_block_found = False
+            for line in lines:
+                file.write(line)
+                if 'http {' in line:
+                    http_block_found = True
+                if http_block_found and '}' in line:
+                    for item in http_block_to_add:
+                        file.write(item + '\n')
+                    http_block_found = False
+                if 'server {' in line:
+                    server_block_found = True
+                if server_block_found and '}' in line:
+                    for item in server_block_to_add:
+                        file.write(item)
+                    server_block_found = False
+
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
+
+
+# Argüman kontrolü
+if "--update-conf" in sys.argv:
+    update_nginx_conf()
+    sys.exit()
 
 def create_nginx_service():
     """ Create and write the nginx.service file """
