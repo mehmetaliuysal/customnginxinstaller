@@ -69,11 +69,6 @@ def update_nginx_conf():
 
                 file.write(line)
 
-            # Add modules at the end of the file
-            for module in modules_to_add:
-                if module + '\n' not in lines:
-                    file.write(module + '\n')
-
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
