@@ -34,8 +34,8 @@ def update_nginx_conf():
         "stream_server_traffic_status_zone;"
     ]
     location_block_additions = [
-        "\t\tlocation /nginx_status {\n\t\t\tstub_status;\n\t\t}\n",
-        "\t\tlocation /http_traffic_status {\n\t\t\tvhost_traffic_status_bypass_limit on;\n\t\t\tvhost_traffic_status_bypass_stats on;\n\t\t\tvhost_traffic_status_display;\n\t\t\tvhost_traffic_status_display_format json;\n\t\t}\n"
+        "\tlocation /nginx_status {\n\t\t\tstub_status;\n\t\t}\n",
+        "\tlocation /http_traffic_status {\n\t\t\tvhost_traffic_status_bypass_limit on;\n\t\t\tvhost_traffic_status_bypass_stats on;\n\t\t\tvhost_traffic_status_display;\n\t\t\tvhost_traffic_status_display_format json;\n\t\t}\n"
     ]
     try:
         with open('/etc/nginx/nginx.conf', 'r') as file:
