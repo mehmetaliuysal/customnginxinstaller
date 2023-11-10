@@ -44,13 +44,15 @@ def update_nginx_conf():
         with open('/etc/nginx/nginx.conf', 'w') as file:
             http_block_found = False
             for line in lines:
-                if 'http {' in line and not http_block_found:
+                if 'http {' in line:
                     file.write(line)
-                    # Add server block additions at the beginning of the http block
+                    http_block_found = True
+                    # Add server block additions immediately inside the http block
                     for addition in server_block_additions:
                         file.write("\t" + addition + "\n")
-                    http_block_found = True
-                elif 'server {' in line and http_block_found:
+                    continue
+
+                if 'server {' in line and http_block_found:
                     file.write(line)
                     # Add location blocks inside the first server block
                     for addition in location_block_additions:
@@ -68,6 +70,7 @@ def update_nginx_conf():
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
+
 
 
 
