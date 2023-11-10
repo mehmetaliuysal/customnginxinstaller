@@ -89,13 +89,34 @@ def update_nginx_conf():
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
 
+def create_nginx_directories():
+    """ Check and create /etc/nginx/sites_enabled and /etc/nginx/ssl directories if they don't exist """
+    nginx_dir = '/etc/nginx'
+    directories_to_check = ['/etc/nginx/sites_enabled', '/etc/nginx/ssl']
 
+    for directory in directories_to_check:
+        # Belirtilen dizinin var olup olmadığını kontrol et
+        if not os.path.exists(directory):
+            try:
+                # Dizin yoksa oluştur
+                os.makedirs(directory)
+                print(f"Directory created: {directory}")
+            except Exception as e:
+                print(f"Failed to create directory {directory}: {e}")
+        else:
+            print(f"Directory already exists: {directory}")
 
 
 # Argüman kontrolü
 if "--update-conf" in sys.argv:
     update_nginx_conf()
     sys.exit()
+
+# Argüman kontrolü
+if "--create-etc-subdirs" in sys.argv:
+    create_nginx_directories()
+    sys.exit()
+
 
 def create_nginx_service():
     """ Create and write the nginx.service file """
@@ -165,6 +186,7 @@ run_command("sudo adduser --system --no-create-home --disabled-login --disabled-
 run_command("sudo mkdir -p /var/lib/nginx/body && sudo mkdir -p /var/lib/nginx/proxy && sudo mkdir -p /var/lib/nginx/fastcgi && sudo mkdir -p /var/lib/nginx/uwsgi && sudo mkdir -p /var/lib/nginx/scgi && sudo chown -R nginx:nginx /var/lib/nginx", "Nginx directories created and permissions set")
 
 update_nginx_conf()
+create_nginx_directories()
 create_nginx_service()
 
 
