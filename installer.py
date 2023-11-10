@@ -34,40 +34,43 @@ def update_nginx_conf():
         "stream_server_traffic_status_zone;"
     ]
     location_block_additions = [
-        "\tlocation /nginx_status {\n\t\tstub_status;\n\t}\n",
-        "\tlocation /http_traffic_status {\n\t\tvhost_traffic_status_bypass_limit on;\n\t\tvhost_traffic_status_bypass_stats on;\n\t\tvhost_traffic_status_display;\n\t\tvhost_traffic_status_display_format json;\n\t}\n"
+        "\t\tlocation /nginx_status {\n\t\t\tstub_status;\n\t\t}\n",
+        "\t\tlocation /http_traffic_status {\n\t\t\tvhost_traffic_status_bypass_limit on;\n\t\t\tvhost_traffic_status_bypass_stats on;\n\t\t\tvhost_traffic_status_display;\n\t\t\tvhost_traffic_status_display_format json;\n\t\t}\n"
     ]
     try:
         with open('/etc/nginx/nginx.conf', 'r') as file:
             lines = file.readlines()
 
         with open('/etc/nginx/nginx.conf', 'w') as file:
-            # Add modules
+            server_block_found = False
+            for line in lines:
+                if 'server {' in line and not server_block_found:
+                    # Mark that we found the first server block
+                    server_block_found = True
+                    file.write(line)  # Write the server block start line
+                    # Add server block additions
+                    for addition in server_block_additions:
+                        file.write("\t" + addition + "\n")
+                else:
+                    file.write(line)
+
+                # Add location blocks inside the first server block, if they don't already exist
+                if server_block_found:
+                    for addition in location_block_additions:
+                        if addition.strip() not in ''.join(lines):
+                            file.write(addition)
+                    break  # Exit after processing the first server block
+
+            # Add modules at the beginning of the file
             for module in modules_to_add:
                 if module + '\n' not in lines:
                     file.write(module + '\n')
 
-            server_block_found = False
-            location_blocks_added = False
-            for line in lines:
-                # Add server block additions before the first server block
-                if 'server {' in line and not server_block_found:
-                    for addition in server_block_additions:
-                        file.write(addition + '\n')
-                    server_block_found = True
-
-                # Add location blocks inside the first server block
-                if server_block_found and not location_blocks_added:
-                    for addition in location_block_additions:
-                        if addition not in lines:
-                            file.write(addition)
-                    location_blocks_added = True
-
-                file.write(line)
-
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
+
+
 
 
 
