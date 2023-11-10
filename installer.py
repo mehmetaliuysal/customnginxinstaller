@@ -22,8 +22,10 @@ time.sleep(10)  # Give the user 10 seconds to abort
 def run_command(command, success_message, change_dir=False):
     """ Run a shell command and print a success message if it succeeds """
     try:
-        if change_dir and command.startswith('cd'):
-            os.chdir(command.replace('cd ', ''))
+        if change_dir:
+            dir_command, actual_command = command.split(' && ', 1)
+            os.chdir(dir_command.replace('cd ', ''))
+            subprocess.check_call(actual_command, shell=True)
         else:
             subprocess.check_call(command, shell=True)
 
@@ -31,6 +33,7 @@ def run_command(command, success_message, change_dir=False):
     except subprocess.CalledProcessError:
         print(Colors.FAIL + f"Error occurred: {command}" + Colors.ENDC)
         exit(1)
+
 
 
 def update_nginx_conf():
