@@ -92,6 +92,12 @@ run_command("sudo apt-get install build-essential libpcre3 libpcre3-dev zlib1g z
 
 # Download, extract, and compile Nginx
 os.chdir('/tmp')
+
+run_command("git clone https://github.com/vozlt/nginx-module-vts.git", "VTS module cloned")
+run_command("git clone https://github.com/vozlt/nginx-module-sts", "STS module cloned")
+run_command("git clone https://github.com/vozlt/nginx-module-stream-sts", "Stream STS module cloned")
+
+
 run_command("wget http://nginx.org/download/nginx-1.24.0.tar.gz", "Downloaded Nginx tarball")
 run_command("tar zxvf nginx-1.24.0.tar.gz", "Extracted Nginx tarball")
 os.chdir('/tmp/nginx-1.24.0')
