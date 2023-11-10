@@ -108,8 +108,8 @@ if not is_git_installed():
 # Initial setup commands
 initial_commands = [
     ("cd /tmp", "Changed directory to /tmp", True),
-    ("sudo apt update", "Package lists updated"),
-    ("sudo apt-get install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libgd-dev libxslt1-dev libxml2-dev libgeoip-dev libgoogle-perftools-dev libperl-dev git wget -y", "Required packages installed"),
+    ("sudo apt update", "Package lists updated",True),
+    ("sudo apt-get install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev libgd-dev libxslt1-dev libxml2-dev libgeoip-dev libgoogle-perftools-dev libperl-dev git wget -y", "Required packages installed",True),
 ]
 
 # Running the initial setup commands
@@ -132,8 +132,8 @@ for cmd, message, change_dir in commands:
 
 # Additional setup commands
 setup_commands = [
-    ("sudo adduser --system --no-create-home --disabled-login --disabled-password --group nginx", "Nginx user created"),
-    ("sudo mkdir -p /var/lib/nginx/body && sudo mkdir -p /var/lib/nginx/proxy && sudo mkdir -p /var/lib/nginx/fastcgi && sudo mkdir -p /var/lib/nginx/uwsgi && sudo mkdir -p /var/lib/nginx/scgi && sudo chown -R nginx:nginx /var/lib/nginx", "Nginx directories created and permissions set"),
+    ("sudo adduser --system --no-create-home --disabled-login --disabled-password --group nginx", "Nginx user created",True),
+    ("sudo mkdir -p /var/lib/nginx/body && sudo mkdir -p /var/lib/nginx/proxy && sudo mkdir -p /var/lib/nginx/fastcgi && sudo mkdir -p /var/lib/nginx/uwsgi && sudo mkdir -p /var/lib/nginx/scgi && sudo chown -R nginx:nginx /var/lib/nginx", "Nginx directories created and permissions set", True),
     # Add the code for updating /etc/nginx/nginx.conf and creating the service file here...
 ]
 
@@ -148,8 +148,8 @@ create_nginx_service()
 
 # Final system commands
 final_commands = [
-    ("sudo systemctl daemon-reload", "System daemon reloaded"),
-    ("sudo systemctl enable nginx", "Nginx service enabled"),
+    ("sudo systemctl daemon-reload", "System daemon reloaded", True),
+    ("sudo systemctl enable nginx", "Nginx service enabled", True),
 ]
 
 # Running the final system commands
