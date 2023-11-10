@@ -30,50 +30,44 @@ def update_nginx_conf():
         "load_module /usr/lib/nginx/modules/ngx_http_stream_server_traffic_status_module.so;"
     ]
     server_block_additions = [
-        "    vhost_traffic_status_zone;",
-        "    stream_server_traffic_status_zone;"
+        "vhost_traffic_status_zone;",
+        "stream_server_traffic_status_zone;"
     ]
     location_block_additions = [
-        "        location /nginx_status {\n            stub_status;\n        }\n",
-        "        location /http_traffic_status {\n            vhost_traffic_status_bypass_limit on;\n            vhost_traffic_status_bypass_stats on;\n            vhost_traffic_status_display;\n            vhost_traffic_status_display_format json;\n        }\n"
+        "\t\tlocation /nginx_status {\n\t\t\tstub_status;\n\t\t}\n",
+        "\t\tlocation /http_traffic_status {\n\t\t\tvhost_traffic_status_bypass_limit on;\n\t\t\tvhost_traffic_status_bypass_stats on;\n\t\t\tvhost_traffic_status_display;\n\t\t\tvhost_traffic_status_display_format json;\n\t\t}\n"
     ]
     try:
         with open('/etc/nginx/nginx.conf', 'r') as file:
             lines = file.readlines()
 
         with open('/etc/nginx/nginx.conf', 'w') as file:
-
             http_block_found = False
             for line in lines:
-                file.write(line)
                 if 'http {' in line and not http_block_found:
-                    # Add server block additions and location blocks
+                    file.write(line)
+                    # Add server block additions at the beginning of the http block
                     for addition in server_block_additions:
-                        if addition.strip() not in ''.join(lines):
-                            file.write(addition)
+                        file.write("\t" + addition + "\n")
                     http_block_found = True
-
-            server_block_found = False
-            for line in lines:
-                file.write(line)
-                if 'server {' in line and not server_block_found:
-                    # Add server block additions and location blocks
+                elif 'server {' in line and http_block_found:
+                    file.write(line)
+                    # Add location blocks inside the first server block
                     for addition in location_block_additions:
-                        if addition.strip() not in ''.join(lines):
-                            file.write(addition)
-                    server_block_found = True
+                        file.write("\t" + addition)
+                    http_block_found = False  # Prevent further additions
+                    continue
+
+                file.write(line)
 
             # Add modules at the end of the file
             for module in modules_to_add:
                 if module + '\n' not in lines:
-                    file.write('\n' + module)
+                    file.write(module + '\n')
 
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
-
-
-
 
 
 
