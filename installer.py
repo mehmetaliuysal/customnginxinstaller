@@ -56,7 +56,7 @@ def update_nginx_conf():
                     http_block_found = True
                     # Add server block additions immediately inside the http block
                     for addition in server_block_additions:
-                        if addition + '\n' not in lines:
+                        if addition not in lines:
                             file.write("\t" + addition + "\n")
                     continue
 
@@ -64,7 +64,7 @@ def update_nginx_conf():
                     file.write(line)
                     # Add location blocks inside the first server block
                     for addition in location_block_additions:
-                        if addition + '\n' not in lines:
+                        if addition  not in lines:
                             file.write("\t" + addition)
                     http_block_found = False  # Prevent further additions
                     continue
