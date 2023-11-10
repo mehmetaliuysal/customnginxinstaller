@@ -24,14 +24,16 @@ def run_command(command, success_message, change_dir=False):
     try:
         if change_dir:
             if ' && ' in command:
-                # Split the command to change directory separately
+                # Split the command to change directory and then execute the actual command
                 dir_command, actual_command = command.split(' && ')
                 os.chdir(dir_command.replace('cd ', ''))
                 subprocess.check_call(actual_command, shell=True)
             else:
+                # Handle commands that are only changing directories
                 os.chdir(command.replace('cd ', ''))
-        else:
-            subprocess.check_call(command, shell=True)
+                return
+        # Execute the command normally
+        subprocess.check_call(command, shell=True)
 
         print(Colors.OKGREEN + success_message + Colors.ENDC)
     except subprocess.CalledProcessError:
