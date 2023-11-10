@@ -42,36 +42,33 @@ def update_nginx_conf():
             lines = file.readlines()
 
         with open('/etc/nginx/nginx.conf', 'w') as file:
-
-            # Add modules at the end of the file
+            # Add modules at the beginning of the file
             for module in modules_to_add:
                 if module + '\n' not in lines:
                     file.write(module + '\n')
 
-
             http_block_found = False
             for line in lines:
+                file.write(line)
                 if 'http {' in line:
-                    file.write(line)
                     http_block_found = True
-                    # Add server block additions immediately inside the http block
-                    for addition in server_block_additions:
-                        file.write("\t" + addition + "\n")
-                    continue
 
+                # Add server block additions if not already present
+                if http_block_found and any(addition in line for addition in server_block_additions):
+                    http_block_found = False  # Prevent further additions
+
+                # Check if server block starts and if location additions are not already present
                 if 'server {' in line and http_block_found:
                     file.write(line)
-                    # Add location blocks inside the first server block
                     for addition in location_block_additions:
-                        file.write("\t" + addition)
-                    http_block_found = False  # Prevent further additions
-                    continue
-
-                file.write(line)
+                        if addition.strip() not in ''.join(lines):
+                            file.write(addition)
+                    http_block_found = False  # Reset for next server block
 
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
+
 
 
 
