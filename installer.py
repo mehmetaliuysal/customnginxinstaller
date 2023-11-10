@@ -19,6 +19,14 @@ def run_command(command, success_message):
         print(Colors.FAIL + f"Error occurred: {command}" + Colors.ENDC)
         exit(1)
 
+def findInLines(lines,str):
+    found = False
+    for line in lines:
+        if str in line:
+            found = True
+            break
+    return found
+
 
 
 def update_nginx_conf():
@@ -41,6 +49,7 @@ def update_nginx_conf():
         with open('/etc/nginx/nginx.conf', 'r') as file:
             lines = file.readlines()
 
+
         with open('/etc/nginx/nginx.conf', 'w') as file:
 
             # Add modules at the end of the file
@@ -51,12 +60,17 @@ def update_nginx_conf():
 
             http_block_found = False
             for line in lines:
+
+                if line.strip().startswith('worker_processes'):
+                    file.write('worker_processes 25;\n')
+                    continue
+
                 if 'http {' in line:
                     file.write(line)
                     http_block_found = True
                     # Add server block additions immediately inside the http block
                     for addition in server_block_additions:
-                        if addition not in lines:
+                        if not findInLines(lines,addition):
                             file.write("\t" + addition + "\n")
                     continue
 
@@ -64,8 +78,8 @@ def update_nginx_conf():
                     file.write(line)
                     # Add location blocks inside the first server block
                     for addition in location_block_additions:
-                        if addition  not in lines:
-                            file.write("\t" + addition)
+                        if not findInLines(lines,addition):
+                            file.write("\t\t" + addition+ "\n")
                     http_block_found = False  # Prevent further additions
                     continue
 
