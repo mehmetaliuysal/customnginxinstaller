@@ -29,8 +29,8 @@ Before running the script, ensure that:
 ## Usage
 
 1. Clone the repository or download the script.
-2. Make the script executable: `chmod +x custom_nginx_install.py`
-3. Run the script: `sudo ./custom_nginx_install.py`
+2. Make the script executable: `chmod +x installer.py`
+3. Run the script: `sudo ./installer.py`
 4. Follow the on-screen instructions.
 
 ## Script Workflow
