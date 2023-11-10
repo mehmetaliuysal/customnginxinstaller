@@ -23,10 +23,13 @@ def run_command(command, success_message, change_dir=False):
     """ Run a shell command and print a success message if it succeeds """
     try:
         if change_dir:
-            # Split the command to change directory separately
-            dir_command, actual_command = command.split(' && ')
-            os.chdir(dir_command.replace('cd ', ''))
-            subprocess.check_call(actual_command, shell=True)
+            if ' && ' in command:
+                # Split the command to change directory separately
+                dir_command, actual_command = command.split(' && ')
+                os.chdir(dir_command.replace('cd ', ''))
+                subprocess.check_call(actual_command, shell=True)
+            else:
+                os.chdir(command.replace('cd ', ''))
         else:
             subprocess.check_call(command, shell=True)
 
