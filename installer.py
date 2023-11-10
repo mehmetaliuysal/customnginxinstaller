@@ -44,31 +44,32 @@ def update_nginx_conf():
         with open('/etc/nginx/nginx.conf', 'w') as file:
             server_block_found = False
             for line in lines:
+                # Add modules at the beginning of the file
+                if line.strip() == 'http {' and not server_block_found:
+                    for module in modules_to_add:
+                        if module + '\n' not in lines:
+                            file.write(module + '\n')
+                    file.write(line)
+                    continue
+
+                # Add server block additions and location blocks inside the first server block
                 if 'server {' in line and not server_block_found:
-                    # Mark that we found the first server block
-                    server_block_found = True
-                    file.write(line)  # Write the server block start line
-                    # Add server block additions
+                    file.write(line)
                     for addition in server_block_additions:
                         file.write("\t" + addition + "\n")
-                else:
-                    file.write(line)
-
-                # Add location blocks inside the first server block, if they don't already exist
-                if server_block_found:
+                    server_block_found = True
+                elif server_block_found and '}' in line:
                     for addition in location_block_additions:
                         if addition.strip() not in ''.join(lines):
                             file.write(addition)
-                    break  # Exit after processing the first server block
+                    server_block_found = False  # Reset for next server block
 
-            # Add modules at the beginning of the file
-            for module in modules_to_add:
-                if module + '\n' not in lines:
-                    file.write(module + '\n')
+                file.write(line)
 
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
+
 
 
 
