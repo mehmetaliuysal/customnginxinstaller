@@ -44,13 +44,19 @@ def update_nginx_conf():
         with open('/etc/nginx/nginx.conf', 'w') as file:
             server_block_found = False
             for line in lines:
-                file.write(line)
                 if 'server {' in line and not server_block_found:
-                    # Add server block additions and location blocks
-                    for addition in server_block_additions + location_block_additions:
+                    # Add server block additions before the first server block
+                    for addition in server_block_additions:
+                        file.write(addition + '\n')
+                    server_block_found = True
+                file.write(line)
+
+                # Add location blocks inside the first server block
+                if server_block_found:
+                    for addition in location_block_additions:
                         if addition.strip() not in ''.join(lines):
                             file.write(addition)
-                    server_block_found = True
+                    break  # Exit after processing the first server block
 
             # Add modules at the end of the file
             for module in modules_to_add:
@@ -60,6 +66,7 @@ def update_nginx_conf():
             print(Colors.OKGREEN + "/etc/nginx/nginx.conf updated successfully." + Colors.ENDC)
     except Exception as e:
         print(Colors.FAIL + f"Failed to update /etc/nginx/nginx.conf: {e}" + Colors.ENDC)
+
 
 
 
